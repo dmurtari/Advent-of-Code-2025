@@ -18,7 +18,6 @@ fn main() {
     let mut sum = 0;
 
     for range in ranges {
-        println!("Range is {}", range);
         let Some(caps) = re.captures(range) else {
             println!("Failed to parse {}", range);
             return;
@@ -29,19 +28,58 @@ fn main() {
         let end = caps[2].to_string().parse::<i64>().unwrap();
 
         for n in start..end + 1 {
-            if is_repeating(n) {
-                inner_count += 1;
-                sum += n;
+            let count = repeat_count(n);
+
+            if count > 0 {
+                inner_count += count;
+                sum += n
             }
         }
 
-        println!("Found {} in range {}", inner_count, range);
+        println!("{}: {}", range, inner_count);
     }
 
     println!("Total: {}", sum);
 }
 
-fn is_repeating(num: i64) -> bool {
+fn repeat_count(num: i64) -> i64 {
+    let num_as_str = num.to_string();
+    let str_len = num_as_str.len();
+    let num_cursors = str_len;
+
+    let mut count = 0;
+
+    for n in 2..num_cursors + 1 {
+        if str_len % n != 0 {
+            continue;
+        }
+
+        let mut sub_str = Vec::new();
+        let hop = str_len / n;
+        let mut cursor = 0;
+
+        while cursor < str_len {
+            sub_str.push(&num_as_str[cursor..cursor + hop]);
+            cursor += hop;
+        }
+
+        if sub_str.len() == 0 {
+            continue;
+        }
+
+        let is_all_eq = sub_str
+            .iter()
+            .fold(true, |acc, &str| acc && str == sub_str[0]);
+
+        if is_all_eq {
+            count += 1;
+        }
+    }
+
+    return count;
+}
+
+fn _is_repeated_twice(num: i64) -> bool {
     let num_as_str = num.to_string();
 
     if num_as_str.len() % 2 != 0 {
