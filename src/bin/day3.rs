@@ -15,9 +15,39 @@ fn main() {
 
     let sum = banks
         .iter()
-        .fold(0, |acc, bank| acc + get_max_joltage(bank));
+        .fold(0, |acc, bank| acc + get_supermax_joltage(bank));
 
     println!("Total output Joltage is: {}", sum)
+}
+
+fn get_supermax_joltage(bank: &str) -> i64 {
+    let mut parsed_bank = Vec::new();
+
+    for char in bank.chars() {
+        parsed_bank.push(char.to_string().parse::<i32>().unwrap());
+    }
+
+    let mut digits = Vec::new();
+    let mut prev_pos = 0;
+
+    for n in 0..12 {
+        let padding = 12 - n;
+        let section = &parsed_bank[prev_pos..parsed_bank.len() - padding + 1];
+        let d = section.iter().max().unwrap();
+        let pos = section.iter().position(|x| x == d).unwrap() + prev_pos;
+
+        prev_pos = pos + 1;
+        digits.push(d);
+    }
+
+    let result = digits
+        .iter()
+        .map(|x| x.to_string())
+        .reduce(|cur, next| cur + &next)
+        .unwrap();
+
+    println!("Result is {}", result);
+    return result.to_string().parse::<i64>().unwrap();
 }
 
 fn get_max_joltage(bank: &str) -> i32 {
