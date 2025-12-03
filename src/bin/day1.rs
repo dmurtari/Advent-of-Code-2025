@@ -5,8 +5,8 @@ use std::fs;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let method = &args[2];
-    let file_path = &args[3];
+    let method = &args[1];
+    let file_path = &args[2];
 
     let mut lines = Vec::new();
     let binding = fs::read_to_string(file_path).unwrap();
