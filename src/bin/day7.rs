@@ -13,7 +13,9 @@ fn main() {
         manifold.push(line.chars().collect());
     }
 
-    split_beam(manifold);
+    let end_state = split_beam(manifold);
+    let timelines = calculate_timelines(end_state);
+    println!("{} timelines", timelines);
 }
 
 fn split_beam(manifold: Vec<Vec<char>>) -> Vec<Vec<char>> {
@@ -49,9 +51,49 @@ fn split_beam(manifold: Vec<Vec<char>>) -> Vec<Vec<char>> {
         }
     }
 
-    print_manifold(&end_state);
     println!("Split {} times", split_count);
     return end_state;
+}
+
+fn calculate_timelines(manifold: Vec<Vec<char>>) -> i64 {
+    let mut timelines: Vec<Vec<i64>> = vec![vec![0; manifold[0].len()]; manifold.len()];
+
+    for row_idx in 0..manifold.len() - 1 {
+        let row = manifold[row_idx].clone();
+        for char_idx in 0..row.len() {
+            let char = row[char_idx];
+            if char == 'S' {
+                timelines[row_idx][char_idx] = 1;
+                continue;
+            }
+
+            if char == '|' {
+                if (char_idx as isize) - 1 >= 0
+                    && char_idx + 1 < row.len()
+                    && manifold[row_idx][char_idx - 1] == '^'
+                    && manifold[row_idx][char_idx + 1] == '^'
+                {
+                    timelines[row_idx][char_idx] = timelines[row_idx - 1][char_idx - 1]
+                        + timelines[row_idx - 1][char_idx + 1]
+                        + timelines[row_idx - 1][char_idx];
+                } else if (char_idx as isize) - 1 >= 0 && manifold[row_idx][char_idx - 1] == '^' {
+                    timelines[row_idx][char_idx] =
+                        timelines[row_idx - 1][char_idx - 1] + timelines[row_idx - 1][char_idx];
+                } else if char_idx + 1 < row.len() && manifold[row_idx][char_idx + 1] == '^' {
+                    timelines[row_idx][char_idx] =
+                        timelines[row_idx - 1][char_idx + 1] + timelines[row_idx - 1][char_idx];
+                } else {
+                    timelines[row_idx][char_idx] = timelines[row_idx - 1][char_idx];
+                }
+
+                continue;
+            }
+        }
+    }
+
+    return timelines[timelines.len() - 2]
+        .iter()
+        .fold(0, |acc, val| acc + val);
 }
 
 fn print_manifold(manifold: &Vec<Vec<char>>) {
